@@ -24,6 +24,7 @@ import org.mozilla.tv.firefox.widget.InlineAutocompleteEditText
 
 class ScreenController {
     var currentActiveScreen = ActiveScreen.NAVIGATION_OVERLAY
+    var overlayIsBrandNew = false
 
     /**
      * To keep things simple, we add all the fragments at start instead of creating them when needed
@@ -130,12 +131,25 @@ class ScreenController {
     }
 
     fun handleBack(fragmentManager: FragmentManager): Boolean {
+        if (overlayIsBrandNew == true) {
+            overlayIsBrandNew = false
+            return true
+        }
         val webRenderFragment = fragmentManager.webRenderFragment()
         if (currentActiveScreen == ActiveScreen.WEB_RENDER) {
             if (webRenderFragment.onBackPressed()) return true
         }
         val transition = ScreenControllerStateMachine.getNewStateBackPress(currentActiveScreen, isOnHomeUrl(fragmentManager))
         return handleTransitionAndUpdateActiveScreen(fragmentManager, transition)
+    }
+
+    fun handleBackLongPress(fragmentManager: FragmentManager): Boolean {
+        if (currentActiveScreen == ActiveScreen.WEB_RENDER) {
+            val transition = Transition.ADD_OVERLAY
+            overlayIsBrandNew = true
+            return handleTransitionAndUpdateActiveScreen(fragmentManager, transition)
+        }
+        return false
     }
 
     fun handleMenu(fragmentManager: FragmentManager) {
