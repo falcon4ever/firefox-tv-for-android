@@ -87,6 +87,8 @@ class WebRenderFragment : EngineViewLifecycleFragment(), Session.Observer {
 
     // Cache the overlay visibility state to persist in fragment back stack
     private var overlayVisibleCached: Int? = null
+    // Know if the overlay was just opened with back button long press
+    private var overlayBackLongPressed: Boolean = false
 
     var sessionFeature: SessionFeature? = null
     private var currentPageUrl = ""
@@ -350,6 +352,9 @@ class WebRenderFragment : EngineViewLifecycleFragment(), Session.Observer {
 
     fun onBackPressed(): Boolean {
         when {
+            overlayBackLongPressed -> {
+                overlayBackLongPressed = false
+            }
             browserOverlay.isVisible && !isUrlEqualToHomepage -> {
                 setOverlayVisible(false)
                 TelemetryIntegration.INSTANCE.userShowsHidesDrawerEvent(false)
@@ -400,11 +405,14 @@ class WebRenderFragment : EngineViewLifecycleFragment(), Session.Observer {
 
     private fun handleSpecialKeyEvent(event: KeyEvent): Boolean {
         val actionIsDown = event.action == KeyEvent.ACTION_DOWN
+        val eventIsLongPress = event.getFlags() and KeyEvent.FLAG_LONG_PRESS != 0
 
         if (event.keyCode == KeyEvent.KEYCODE_DPAD_CENTER && actionIsDown) MenuInteractionMonitor.selectPressed()
 
-        if (event.keyCode == KeyEvent.KEYCODE_MENU && !isUrlEqualToHomepage) {
+        if ((event.keyCode == KeyEvent.KEYCODE_MENU || (event.keyCode == KeyEvent.KEYCODE_BACK && eventIsLongPress))
+                && !isUrlEqualToHomepage) {
             if (actionIsDown) {
+                if (event.keyCode == KeyEvent.KEYCODE_BACK) overlayBackLongPressed = true
                 val toShow = !browserOverlay.isVisible
                 setOverlayVisible(toShow)
                 TelemetryIntegration.INSTANCE.userShowsHidesDrawerEvent(toShow)
