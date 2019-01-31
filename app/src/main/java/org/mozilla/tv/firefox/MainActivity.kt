@@ -203,6 +203,11 @@ class MainActivity : LocaleAwareAppCompatActivity(), OnUrlEnteredListener, Media
         }
         TelemetryIntegration.INSTANCE.saveRemoteControlInformation(applicationContext, event)
 
+        if (event.keyCode == KeyEvent.KEYCODE_BACK && event.getFlags() and KeyEvent.FLAG_LONG_PRESS != 0 &&
+                event.action == KeyEvent.ACTION_DOWN) {
+            serviceLocator.screenController.handleBackLongPress(supportFragmentManager)
+            return true
+        }
         if (event.keyCode == KeyEvent.KEYCODE_MENU) {
             if (event.action == KeyEvent.ACTION_DOWN) {
                 serviceLocator.screenController.handleMenu(supportFragmentManager)
