@@ -20,7 +20,7 @@ android {
     buildToolsVersion '28.0.3'
 
     defaultConfig {
-        applicationId "org.mozilla.tv.firefox"
+        applicationId "org.zecakeh.tv.firefox"
         minSdkVersion 22
         targetSdkVersion 28
         versionCode 11 // This versionCode is "frozen" for local builds. For "release" builds we
@@ -436,6 +436,12 @@ if (project.hasProperty("coverage")) {
                 testCoverageEnabled true
                 applicationIdSuffix ".coverage"
             }
+        }
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all {
+            outputFileName = "${applicationId}-${variant.buildType.name}-${defaultConfig.versionName}.apk"
         }
     }
 }
