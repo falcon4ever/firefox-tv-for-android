@@ -31,6 +31,8 @@ import org.mozilla.tv.firefox.widget.InlineAutocompleteEditText
 class ScreenController(private val sessionRepo: SessionRepo) {
 
     private val _currentActiveScreen = BehaviorSubject.createDefault(ActiveScreen.NAVIGATION_OVERLAY)
+    // Cache if an action was taken with long back press to avoid actions in handleBack
+    private var longBackPressed: Boolean = false
     /**
      * Observers will be notified just before the fragment transaction is committed
      */
@@ -156,6 +158,14 @@ class ScreenController(private val sessionRepo: SessionRepo) {
             return handleMenu(fragmentManager)
         }
 
+        val keyLongBackPressDown = keyEvent.keyCode == KeyEvent.KEYCODE_BACK &&
+                keyEvent.getFlags() and KeyEvent.FLAG_LONG_PRESS != 0 &&
+                keyEvent.action == KeyEvent.ACTION_DOWN
+        if (keyLongBackPressDown) {
+            longBackPressed = true
+            return handleMenu(fragmentManager)
+        }
+
         val webRenderIsActive = _currentActiveScreen.value == ScreenControllerStateMachine.ActiveScreen.WEB_RENDER
         if (webRenderIsActive) {
             if (fragmentManager.webRenderFragment().dispatchKeyEvent(keyEvent)) return true
@@ -164,6 +174,10 @@ class ScreenController(private val sessionRepo: SessionRepo) {
     }
 
     fun handleBack(fragmentManager: FragmentManager): Boolean {
+        if (longBackPressed) {
+            longBackPressed = false
+            return true
+        }
         if (_currentActiveScreen.value == ActiveScreen.WEB_RENDER) {
             if (sessionRepo.attemptBack()) return true
         }
