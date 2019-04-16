@@ -9,10 +9,6 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> <!-- Used by sentry. -->
 
-    <!-- Required for media playback voice control.
-           https://developer.amazon.com/blogs/appstore/post/623addd5-6184-4e7f-a969-123a653cfb1a/implementing-voice-control-with-the-media-session-api-on-amazon-fire-tv -->
-    <uses-permission android:name="com.amazon.permission.media.session.voicecommandcontrol" />
-
     <uses-feature android:name="android.hardware.touchscreen" android:required="false"/>
     <uses-feature android:name="android.software.leanback" android:required="true" />
 
@@ -85,27 +81,6 @@
 
         <activity android:name=".pocket.PocketOnboardingActivity"
                   android:theme="@style/AppTheme.Transparent"/>
-
-        <!-- Allows MediaSessionCallbacks to be called while a voice command is active. Without
-             this, the video pauses for the voice command, resumes when the voice command ends, and
-             then MediaSessionCallbacks can be executed (e.g. pausing the video again for a pause
-             command). For docs, see:
-               https://developer.amazon.com/docs/fire-tv/mediasession-api-integration.html#enhanced-experience-for-voice-enabled-playback-controls-using-media-session-optional
-
-             Unfortunately, in practice, we can't stop the video from playing after a voice command:
-             see `VideoVoiceCommandMediaSession.MediaSessionCallbacks.onPause`.
-
-             We add this meta-data tag anyway because:
-             - On Cube, it sometimes decreases the playing time in pause-playing-pause by a few hundred milliseconds
-             - This "execute callbacks during a voice command" is the default behavior on the 4K but
-               not the Cube. Adding this flag allows us to opt into this behavior on the Cube,
-               reducing our device fragmentation.
-
-             Unfortunately, this opt-in behavior is more fragile than not opting in (see the code
-             mentioned above for details). -->
-        <meta-data
-            android:name="com.amazon.voice.supports_background_media_session"
-            android:value="true" />
 
         <meta-data
             android:name="android.webkit.WebView.MetricsOptOut"
